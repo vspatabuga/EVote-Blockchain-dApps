@@ -26,6 +26,10 @@ Proyek ini adalah aplikasi e-voting terdesentralisasi (Decentralized Application
   </a>
 </p>
 
+## Informasi & Catatan Pengembangan
+
+Silahkan akses pada **[Wiki Proyek](https://github.com/vspatabuga/EVote-Blockchain-dApps/wiki)** untuk informasi selengkapnya.
+
 ## Fitur Utama
 
 - **Voting Terdesentralisasi:** Seluruh proses voting dan perhitungan suara dikelola oleh smart contract, memastikan keadilan dan transparansi.
