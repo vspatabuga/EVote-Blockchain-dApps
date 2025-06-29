@@ -1,0 +1,29 @@
+{
+  "name": "evote-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bootstrap": "^5.3.7",
+    "dotenv": "^17.0.0",
+    "ethers": "^6.14.4",
+    "knex": "^3.1.0",
+    "next": "^15.3.4",
+    "pg": "^8.16.3",
+    "process": "^0.11.10",
+    "react": "^19.1.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2"
+  },
+  "devDependencies": {
+    "eslint": "^8",
+    "eslint-config-next": "^15.3.4"
+  }
+}
