@@ -118,4 +118,4 @@ Kontribusi
 Kontribusi disambut baik! Silakan ajukan pull request jika Anda memiliki perbaikan atau fitur baru.
 
 Lisensi
--
+MIT License
