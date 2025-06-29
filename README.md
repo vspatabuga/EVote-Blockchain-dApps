@@ -114,8 +114,8 @@ npm run dev
 ```
 Aplikasi akan berjalan di http://localhost:3000. Buka browser Anda dan akses URL tersebut untuk mulai menggunakan dApps e-voting.
 
-Kontribusi
+## Kontribusi
 Kontribusi disambut baik! Silakan ajukan pull request jika Anda memiliki perbaikan atau fitur baru.
 
-Lisensi
+## Lisensi
 MIT License
