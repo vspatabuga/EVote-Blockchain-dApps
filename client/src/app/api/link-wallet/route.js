@@ -10,15 +10,15 @@ export async function POST(request) {
             return NextResponse.json({ message: 'Data tidak valid' }, { status: 400 });
         }
 
-        // --- PERUBAHAN UTAMA DI SINI ---
         // Operasi "Upsert" menggunakan Knex untuk PostgreSQL
+        // Ini akan mencari baris dengan kombinasi sesi_id dan nim.
         const [registration] = await db('registrasi')
             .insert({
                 sesi_id: sesiId,
                 nim: nim,
                 wallet_address: walletAddress,
             })
-            // Jika terjadi konflik pada kombinasi (sesi_id, nim), jangan error.
+            // Jika konflik terjadi pada (sesi_id, nim), jangan error.
             .onConflict(['sesi_id', 'nim'])
             // Sebaliknya, UPDATE kolom wallet_address dengan nilai yang baru.
             .merge({
@@ -30,12 +30,12 @@ export async function POST(request) {
 
     } catch (error) {
         // Blok catch ini sekarang hanya akan menangani error tak terduga
-        // atau jika wallet yang sama mencoba dipakai oleh NIM yang berbeda.
+        // atau jika wallet yang sama mencoba dipakai oleh NIM berbeda (pelanggaran unique constraint pada wallet_address).
         if (error.code === '23505') { 
             return NextResponse.json({ message: 'Alamat Wallet ini sudah terdaftar oleh pengguna lain.' }, { status: 409 });
         }
         
         console.error('Link Wallet API Error:', error);
-        return NextResponse.json({ message: 'Terjadi kesalahan pada server' }, { status: 500 });
+        return NextResponse.json({ message: 'Terjadi kesalahan pada server saat menautkan wallet.' }, { status: 500 });
     }
 }

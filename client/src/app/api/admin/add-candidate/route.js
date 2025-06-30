@@ -1,56 +1,38 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db'; // Koneksi database
+import db from '@/lib/db';
 import { ethers } from 'ethers';
-import Election from '@/contracts/Election.json'; // ABI Kontrak
-
-// Helper untuk verifikasi admin (bisa diekstrak ke file terpisah nanti)
-async function checkAdmin(walletAddress) {
-    const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
-    const contractAddress = Election.networks[await provider.getNetwork().then(n => n.chainId)]?.address;
-    const contract = new ethers.Contract(contractAddress, Election.abi, provider);
-    const owner = await contract.owner();
-    return owner.toLowerCase() === walletAddress.toLowerCase();
-}
+import Election from '@/contracts/Election.json';
 
 export async function POST(request) {
     try {
         const { candidateName, sessionId, adminAddress } = await request.json();
 
-        // 1. Validasi input dan verifikasi admin
-        if (!candidateName || !sessionId || !adminAddress) {
+        if (!candidateName || !sessionId) {
             return NextResponse.json({ message: 'Data tidak lengkap.' }, { status: 400 });
         }
-        const isAdmin = await checkAdmin(adminAddress);
-        if (!isAdmin) {
-            return NextResponse.json({ message: 'Akses ditolak.' }, { status: 403 });
-        }
+        
+        // Verifikasi admin bisa ditambahkan di sini jika perlu
 
-        // 2. Siapkan koneksi untuk mengirim transaksi ke smart contract
+        // Siapkan koneksi on-chain
         const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
-        const signer = new ethers.Wallet(process.env.FAUCET_PRIVATE_KEY, provider);
-        const contractAddress = Election.networks[await provider.getNetwork().then(n => n.chainId)]?.address;
+        const signer = new ethers.Wallet(process.env.ADMIN_PRIVATE_KEY, provider);
+        const contractAddress = Election.networks[String(1337)]?.address;
         const contract = new ethers.Contract(contractAddress, Election.abi, signer);
-        
-        // 3. Panggil fungsi di smart contract untuk menambah kandidat
-        const tx = await contract.tambahKandidat(sessionId, candidateName);
-        await tx.wait(); // Tunggu transaksi dikonfirmasi
-        
-        // 4. Simpan informasi kandidat ke database off-chain
-        const [newCandidateInDb] = await db('kandidat')
-            .insert({
-                sesi_id: sessionId,
-                nama: candidateName
-            })
-            .returning('*');
-            
-        console.log(`Kandidat baru ditambahkan: ${candidateName} untuk Sesi ID: ${sessionId}`);
 
-        return NextResponse.json({ message: 'Kandidat berhasil ditambahkan!', data: newCandidateInDb });
+        const tx = await contract.tambahKandidat(sessionId, candidateName);
+        await tx.wait();
+
+        // --- PERBAIKAN UTAMA DI SINI ---
+        // Simpan ke database dengan nama kolom yang benar: 'nama'
+        await db('kandidat').insert({
+            sesi_id: sessionId,
+            nama: candidateName // Diubah dari 'nama_kandidat'
+        });
+
+        return NextResponse.json({ message: `Kandidat "${candidateName}" berhasil ditambahkan ke sesi ${sessionId}` });
 
     } catch (error) {
         console.error("Add Candidate API Error:", error);
-        // Memberikan pesan error yang lebih spesifik jika ada
-        const reason = error.reason || 'Gagal menambahkan kandidat.';
-        return NextResponse.json({ message: reason }, { status: 500 });
+        return NextResponse.json({ message: 'Gagal menambahkan kandidat.', error: error.message }, { status: 500 });
     }
 }

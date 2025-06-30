@@ -15,6 +15,8 @@ exports.up = function(knex) {
       table.string('nama_sesi', 255).notNullable();
       table.string('status', 50).defaultTo('Belum Dimulai'); // cth: Belum Dimulai, Registrasi, Berlangsung, Selesai
       table.timestamp('created_at').defaultTo(knex.fn.now());
+      table.integer('status').notNullable().defaultTo(0); // 0: Belum Dimulai, 1: Registrasi, 2: Voting, 3: Selesai
+      table.boolean('is_active').notNullable().defaultTo(false); // Tambahkan kolom ini
     })
     // Tabel untuk kandidat yang terikat pada setiap sesi
     .createTable('kandidat', function(table) {

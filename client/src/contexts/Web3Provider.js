@@ -11,7 +11,7 @@ export function Web3Provider({ children }) {
     const [provider, setProvider] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Fungsi ini HANYA untuk menghubungkan wallet
+    // Fungsi ini HANYA untuk menghubungkan wallet saat tombol diklik
     const connectWallet = useCallback(async () => {
         if (!window.ethereum) {
             toast.error("Harap install MetaMask.");
@@ -36,10 +36,11 @@ export function Web3Provider({ children }) {
         return false; // Mengindikasikan koneksi gagal
     }, []);
 
-    // Event listener untuk menangani perubahan di MetaMask
+    // Event listener untuk menangani perubahan di MetaMask (seperti ganti akun)
     useEffect(() => {
         if (window.ethereum) {
             const handleAccountsChanged = (accounts) => {
+                console.log("Akun diganti:", accounts[0] || "Tidak ada akun");
                 setAccount(accounts[0] || null);
             };
             const handleChainChanged = () => window.location.reload();
