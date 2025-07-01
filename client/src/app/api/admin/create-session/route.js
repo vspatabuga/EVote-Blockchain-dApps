@@ -5,41 +5,36 @@ import Election from '@/contracts/Election.json';
 
 export async function POST(request) {
     try {
-        const { sessionName, adminAddress } = await request.json();
-        // Anda bisa menambahkan verifikasi admin di sini
-
-        // 1. Siapkan koneksi on-chain
+        const { sessionName } = await request.json();
+        
+        // Siapkan koneksi on-chain
         const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
-        const signer = new ethers.Wallet(process.env.FAUCET_PRIVATE_KEY, provider);
+        const signer = new ethers.Wallet(process.env.ADMIN_PRIVATE_KEY, provider);
         const contractAddress = Election.networks[String(1337)]?.address;
         const contract = new ethers.Contract(contractAddress, Election.abi, signer);
 
-        // 2. Panggil fungsi di smart contract untuk membuat sesi on-chain
+        // Panggil fungsi di smart contract
         const tx = await contract.mulaiSesiBaru(sessionName);
         await tx.wait();
         
-        // 3. Simpan sesi ke database off-chain TANPA menyertakan ID manual
-        // Biarkan database yang membuat ID-nya sendiri secara otomatis.
-        await db.transaction(async trx => {
-            // Set semua sesi yang ada menjadi tidak aktif
-            await trx('sesi_pemilihan').update({ is_active: false });
+        // Ambil ID yang baru saja dibuat oleh smart contract
+        const newSessionIdOnChain = await contract.totalSesi();
 
-            // Buat sesi baru dan set sebagai aktif
+        // Gunakan transaksi database untuk memastikan konsistensi
+        await db.transaction(async trx => {
+            await trx('sesi_pemilihan').update({ is_active: false });
             await trx('sesi_pemilihan').insert({
+                // GUNAKAN ID DARI ON-CHAIN
+                id: Number(newSessionIdOnChain), 
                 nama_sesi: sessionName,
                 status: 'Belum Dimulai',
                 is_active: true
             });
         });
 
-        return NextResponse.json({ message: `Sesi "${sessionName}" berhasil dibuat dan diaktifkan.` });
-
+        return NextResponse.json({ message: `Sesi "${sessionName}" berhasil dibuat.` });
     } catch (error) {
         console.error("Create Session API Error:", error);
-        // Tangani error jika nama sesi sudah ada, atau error lainnya
-        if (error.code === '23505') { // Unique violation
-            return NextResponse.json({ message: 'Nama sesi sudah digunakan.' }, { status: 409 });
-        }
         return NextResponse.json({ message: 'Gagal membuat sesi baru.' }, { status: 500 });
     }
 }

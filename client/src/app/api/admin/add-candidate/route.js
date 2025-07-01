@@ -3,6 +3,11 @@ import db from '@/lib/db';
 import { ethers } from 'ethers';
 import Election from '@/contracts/Election.json';
 
+// Tambahkan blok dotenv untuk memastikan environment variable terbaca
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
 export async function POST(request) {
     try {
         const { candidateName, sessionId, adminAddress } = await request.json();
@@ -23,10 +28,10 @@ export async function POST(request) {
         await tx.wait();
 
         // --- PERBAIKAN UTAMA DI SINI ---
-        // Simpan ke database dengan nama kolom yang benar: 'nama'
+        // Simpan ke database dengan nama kolom yang benar: 'nama_kandidat'
         await db('kandidat').insert({
             sesi_id: sessionId,
-            nama: candidateName // Diubah dari 'nama_kandidat'
+            nama_kandidat: candidateName // Diubah dari 'nama'
         });
 
         return NextResponse.json({ message: `Kandidat "${candidateName}" berhasil ditambahkan ke sesi ${sessionId}` });
