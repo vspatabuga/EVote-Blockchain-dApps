@@ -16,6 +16,7 @@ export default function HomePage() {
   // State untuk alur pendaftaran
   const [appState, setAppState] = useState('register');
   const [validatedNim, setValidatedNim] = useState(null);
+  
 
   // State untuk data pengumuman
   const [announcementData, setAnnouncementData] = useState(null);
@@ -41,13 +42,13 @@ export default function HomePage() {
   }, []);
   
   // Efek untuk auto-redirect jika sudah login
-  useEffect(() => {
-    // Jika provider tidak sedang loading DAN sebuah akun sudah terhubung,
-    // artinya login berhasil, maka arahkan ke dashboard.
-    if (!isLoading && account) {
-      router.push('/dashboard');
-    }
-  }, [isLoading, account, router]); // Awasi perubahan pada state ini
+  // useEffect(() => {
+  //   // Jika provider tidak sedang loading DAN sebuah akun sudah terhubung,
+  //   // artinya login berhasil, maka arahkan ke dashboard.
+  //   if (!isLoading && account) {
+  //     router.push('/dashboard');
+  //   }
+  // }, [isLoading, account, router]); // Awasi perubahan pada state ini
 
   const handleRegistrationSuccess = (nim) => {
     setValidatedNim(nim);

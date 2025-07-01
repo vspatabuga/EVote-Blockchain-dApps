@@ -2,24 +2,29 @@ import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 
 export async function GET(request) {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('sessionId');
+
+     // --- DEBUGGING DITAMBAHKAN DI SINI ---
+    console.log('--- API /api/admin/registered-voters (ADMIN) ---');
+    console.log('Menerima permintaan untuk mengambil daftar pemilih.');
+    console.log('Meminta dari Sesi ID:', sessionId);
+    console.log('-----------------------------------------------');
+    // --- AKHIR DEBUGGING ---
+
+    if (!sessionId) {
+        return NextResponse.json({ message: 'Session ID diperlukan' }, { status: 400 });
+    }
+
     try {
-        const { searchParams } = new URL(request.url);
-        const sessionId = searchParams.get('sessionId');
-
-        if (!sessionId) {
-            return NextResponse.json({ message: 'ID Sesi diperlukan' }, { status: 400 });
-        }
-
-        // PERBAIKAN: Mengganti .andWhereNotNull() menjadi .whereNotNull()
-        const registeredVoters = await db('registrasi')
+        // Menggunakan nama tabel 'registrasi' yang benar
+        const voters = await db('registrasi')
             .where({ sesi_id: sessionId })
-            .whereNotNull('wallet_address'); // Metode yang benar adalah whereNotNull()
+            .select('id as registrasi_id', 'nim', 'wallet_address'); // Mengambil kolom yang relevan
 
-        return NextResponse.json(registeredVoters);
-
+        return NextResponse.json(voters);
     } catch (error) {
-        // Log error yang lebih detail di sisi server
         console.error("Get Registered Voters API Error:", error);
-        return NextResponse.json({ message: 'Gagal mengambil data pendaftar' }, { status: 500 });
+        return NextResponse.json({ message: 'Gagal mengambil data pemilih terdaftar.' }, { status: 500 });
     }
 }

@@ -1,21 +1,26 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Form, Button, Card, Alert, Spinner, Container } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 import { useWeb3 } from '@/contexts/Web3Provider';
 
 export default function RegistrationForm({ onSuccess }) {
-  const { connectWallet } = useWeb3();
+  const { connectWallet, isLoading: isConnecting } = useWeb3();
+  const router = useRouter();
+  
   const [nim, setNim] = useState('');
   const [pic, setPic] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Handler HANYA untuk registrasi pemilih baru
   const handleVoterSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    const loadingToast = toast.loading('Memvalidasi data...');
+    setIsSubmitting(true);
+    setError('');
+    const loadingToast = toast.loading('Memvalidasi NIM/PIC...');
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -24,23 +29,36 @@ export default function RegistrationForm({ onSuccess }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Terjadi kesalahan');
-      toast.success('Validasi NIM/PIC berhasil!', { id: loadingToast });
-      onSuccess(nim);
+      
+      toast.success('Validasi berhasil! Lanjutkan ke orientasi.', { id: loadingToast });
+      onSuccess(nim); // Panggil callback untuk pindah ke halaman Onboarding
+
     } catch (err) {
       toast.error(`Gagal: ${err.message}`, { id: loadingToast });
       setError(err.message);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
+  // Handler HANYA untuk login langsung
+  const handleLogin = async () => {
+    const success = await connectWallet();
+    if (success) {
+      router.push('/dashboard');
+    }
+    // Notifikasi error sudah ditangani di dalam connectWallet
+  };
+
+  const isLoading = isConnecting || isSubmitting;
+
   return (
-    <Container style={{ maxWidth: '500px' }} className="mt-5">
-      <Card>
-        <Card.Header as="h3">Portal E-Voting</Card.Header>
-        <Card.Body>
-          <Card.Title>Registrasi Pemilih</Card.Title>
-          <Card.Text>Untuk pemilih, silakan masukkan NIM dan PIN Anda.</Card.Text>
+    <Card>
+      <Card.Header as="h3">Portal E-Voting</Card.Header>
+      <Card.Body>
+        <div className="mb-4">
+          <Card.Title>1. Untuk Pemilih (Baru & Lama)</Card.Title>
+          <Card.Text>Mulai dari sini untuk memvalidasi NIM & PIN Anda.</Card.Text>
           <Form onSubmit={handleVoterSubmit}>
             <Form.Group className="mb-3" controlId="formNim">
               <Form.Label>NIM</Form.Label>
@@ -52,19 +70,21 @@ export default function RegistrationForm({ onSuccess }) {
             </Form.Group>
             {error && <Alert variant="danger">{error}</Alert>}
             <div className="d-grid">
-              <Button variant="primary" type="submit" disabled={isLoading}>{isLoading ? <Spinner size="sm" /> : 'Validasi'}</Button>
+              <Button variant="primary" type="submit" disabled={isLoading}>{isSubmitting ? 'Memvalidasi...' : 'Lanjutkan'}</Button>
             </div>
           </Form>
-          <hr className="my-4" />
-          <Card.Title>Login</Card.Title>
-          <Card.Text>Untuk Admin atau pemilih yang sudah mendaftar.</Card.Text>
+        </div>
+        <hr/>
+        <div className="mt-4">
+          <Card.Title>2. Untuk Administrator</Card.Title>
+          <Card.Text>Login langsung menggunakan wallet admin Anda.</Card.Text>
           <div className="d-grid">
-            <Button variant="secondary" onClick={connectWallet} disabled={isLoading}>
-              {isLoading ? <Spinner size="sm" /> : 'Hubungkan Wallet (Login)'}
+            <Button variant="secondary" onClick={handleLogin} disabled={isLoading}>
+              {isConnecting ? 'Menghubungkan...' : 'Login dengan Wallet Admin'}
             </Button>
           </div>
-        </Card.Body>
-      </Card>
-    </Container>
+        </div>
+      </Card.Body>
+    </Card>
   );
 }

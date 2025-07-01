@@ -1,45 +1,59 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useWeb3 } from '@/contexts/Web3Provider'; // Pastikan path ini benar
 import { Card, Form, Button, Spinner, Alert, ListGroup } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
-export default function VoterPanel({ contract, sessionId }) {
+export default function VoterPanel({ contract }) {
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidateId, setSelectedCandidateId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [hasVoted, setHasVoted] = useState(false);
+  
+  // State untuk info sesi aktif
+  const [sessionInfo, setSessionInfo] = useState(null);
+
+  // Efek untuk mengambil info sesi dan kandidat
+  const loadVoterData = useCallback(async () => {
+    if (contract) {
+      setIsLoading(true);
+      setError('');
+      try {
+        // Ambil info sesi aktif dari API pusat
+        const sessionRes = await fetch('/api/public/active-session-info');
+        const sessionData = await sessionRes.json();
+        if (!sessionRes.ok) throw new Error(sessionData.message);
+        setSessionInfo(sessionData);
+
+        if (sessionData.active) {
+            // PERBAIKAN: Gunakan Number() untuk mengubah BigInt dari on-chain data
+            const sessionOnChain = await contract.daftarSesi(sessionData.id);
+            const candidateCount = Number(sessionOnChain.jumlahKandidat);
+            
+            const candidatesList = [];
+            for (let i = 1; i <= candidateCount; i++) {
+                const candidate = await contract.daftarKandidat(sessionData.id, i);
+                candidatesList.push({ 
+                    id: Number(candidate.id), 
+                    name: candidate.nama,
+                });
+            }
+            setCandidates(candidatesList);
+        }
+      } catch (err) {
+        console.error("Gagal memuat data VoterPanel:", err);
+        setError("Tidak dapat memuat data pemilihan.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [contract]);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      if (contract && sessionId) {
-        setIsLoading(true);
-        try {
-          // Ambil daftar kandidat
-          const session = await contract.daftarSesi(sessionId);
-          const candidateCount = session.jumlahKandidat.toNumber();
-          const candidatesList = [];
-          for (let i = 1; i <= candidateCount; i++) {
-            const candidate = await contract.daftarKandidat(sessionId, i);
-            candidatesList.push({ id: candidate.id.toNumber(), name: candidate.nama, voteCount: candidate.jumlahSuara.toNumber() });
-          }
-          setCandidates(candidatesList);
-
-          // Cek apakah user sudah pernah vote di sesi ini
-          // Anda perlu menambahkan 'account' dari useWeb3() jika VoterPanel tidak menerimanya sebagai prop
-          // Untuk sekarang, kita asumsikan pengecekan dilakukan saat voting
-        } catch (err) {
-          console.error("Gagal mengambil data: ", err);
-          setError("Tidak dapat memuat data kandidat.");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchInitialData();
-  }, [contract, sessionId]);
+    loadVoterData();
+  }, [loadVoterData]);
 
   const handleVote = async (e) => {
     e.preventDefault();
@@ -52,12 +66,12 @@ export default function VoterPanel({ contract, sessionId }) {
     const toastId = toast.loading('Mengirim suara Anda ke blockchain...');
 
     try {
-      const tx = await contract.vote(sessionId, selectedCandidateId);
-      await tx.wait();
+      const tx = await contract.vote(sessionInfo.id, selectedCandidateId);
+      await tx.wait(); // Tunggu transaksi dikonfirmasi
       toast.success("Terima kasih! Suara Anda telah berhasil dicatat.", { id: toastId });
       setHasVoted(true); // Tandai bahwa user sudah berhasil vote
     } catch (err) {
-      const reason = err.reason || "Transaksi ditolak atau gagal.";
+      const reason = err.reason || "Transaksi ditolak atau Anda sudah memilih.";
       toast.error(`Gagal memberikan suara: ${reason}`, { id: toastId });
       setError(`Gagal memberikan suara: ${reason}`);
     } finally {
@@ -66,9 +80,9 @@ export default function VoterPanel({ contract, sessionId }) {
   };
 
   if (isLoading) {
-    return <Spinner animation="border" role="status"><span className="visually-hidden">Memuat...</span></Spinner>;
+    return <Spinner animation="border" role="status"><span className="visually-hidden">Memuat Portal Pemilihan...</span></Spinner>;
   }
-
+  
   if (hasVoted) {
       return (
           <Alert variant="success">
@@ -78,14 +92,22 @@ export default function VoterPanel({ contract, sessionId }) {
       );
   }
 
+  if (sessionInfo && sessionInfo.status !== 'VotingBerlangsung') {
+      return (
+          <Alert variant="warning">
+            Periode voting untuk sesi <strong>"{sessionInfo.name}"</strong> saat ini <strong>{sessionInfo.status}</strong>.
+          </Alert>
+      );
+  }
+
   return (
     <Card>
-      <Card.Header as="h3">Portal Pemilihan - Sesi {sessionId}</Card.Header>
+      <Card.Header as="h3">Portal Pemilihan - {sessionInfo?.name || 'Sesi Tidak Ditemukan'}</Card.Header>
       <Card.Body>
         <Card.Title>Silakan Pilih Kandidat Anda</Card.Title>
         <Form onSubmit={handleVote}>
           <ListGroup variant="flush" className="my-4">
-            {candidates.map((candidate) => (
+            {candidates.length > 0 ? candidates.map((candidate) => (
               <ListGroup.Item key={candidate.id}>
                 <Form.Check 
                   type="radio"
@@ -96,19 +118,14 @@ export default function VoterPanel({ contract, sessionId }) {
                   onChange={(e) => setSelectedCandidateId(e.target.value)}
                 />
               </ListGroup.Item>
-            ))}
+            )) : <p>Belum ada kandidat untuk sesi ini.</p>}
           </ListGroup>
 
           {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
           
           <div className="d-grid">
             <Button variant="primary" type="submit" disabled={isLoading || !selectedCandidateId}>
-              {isLoading ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                  <span className="ms-2">Mengirim Suara...</span>
-                </>
-              ) : 'Kirim Suara'}
+              {isLoading ? 'Mengirim Suara...' : 'Kirim Suara'}
             </Button>
           </div>
         </Form>

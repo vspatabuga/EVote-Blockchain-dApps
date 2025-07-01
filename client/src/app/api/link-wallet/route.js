@@ -6,36 +6,39 @@ export async function POST(request) {
     try {
         const { nim, walletAddress, sesiId } = await request.json();
 
+        // --- DEBUGGING DITAMBAHKAN DI SINI ---
+        console.log('--- API /api/link-wallet (PEMILIH) ---');
+        console.log('Menerima permintaan registrasi:');
+        console.log('NIM:', nim);
+        console.log('Wallet Address:', walletAddress);
+        console.log('Menyimpan ke Sesi ID:', sesiId);
+        console.log('------------------------------------');
+        // --- AKHIR DEBUGGING ---
+
         if (!nim || !walletAddress || !sesiId || !ethers.isAddress(walletAddress)) {
             return NextResponse.json({ message: 'Data tidak valid' }, { status: 400 });
         }
 
-        // --- PERUBAHAN UTAMA DI SINI ---
-        // Operasi "Upsert" menggunakan Knex untuk PostgreSQL
+        // Menggunakan nama tabel 'registrasi' yang benar
         const [registration] = await db('registrasi')
             .insert({
                 sesi_id: sesiId,
                 nim: nim,
                 wallet_address: walletAddress,
             })
-            // Jika terjadi konflik pada kombinasi (sesi_id, nim), jangan error.
             .onConflict(['sesi_id', 'nim'])
-            // Sebaliknya, UPDATE kolom wallet_address dengan nilai yang baru.
             .merge({
                 wallet_address: walletAddress,
             })
-            .returning('*'); // Kembalikan baris yang di-insert atau di-update
+            .returning('*');
 
         return NextResponse.json({ message: 'Wallet berhasil ditautkan!', data: registration });
 
     } catch (error) {
-        // Blok catch ini sekarang hanya akan menangani error tak terduga
-        // atau jika wallet yang sama mencoba dipakai oleh NIM yang berbeda.
         if (error.code === '23505') { 
-            return NextResponse.json({ message: 'Alamat Wallet ini sudah terdaftar oleh pengguna lain.' }, { status: 409 });
+            return NextResponse.json({ message: 'Alamat Wallet ini sudah digunakan oleh NIM lain di sesi ini.' }, { status: 409 });
         }
-        
         console.error('Link Wallet API Error:', error);
-        return NextResponse.json({ message: 'Terjadi kesalahan pada server' }, { status: 500 });
+        return NextResponse.json({ message: 'Gagal menautkan wallet.' }, { status: 500 });
     }
 }
