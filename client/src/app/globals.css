@@ -1,42 +1,109 @@
+/* === PALET WARNA BARU (PUTIH, UNGU, ABU-ABU) === */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warna Dasar */
+  --background-color: #ffffff; /* Latar belakang putih bersih */
+  --card-background-color: #ffffff;
+  
+  /* Warna Teks */
+  --text-primary: #1e293b;      /* Abu-abu sangat gelap (hampir hitam) untuk judul */
+  --text-secondary: #64748b;    /* Abu-abu yang estetik untuk paragraf */
+  --text-light: #ffffff;        /* Putih untuk teks di atas latar gelap */
+
+  /* Warna Aksen/Primer (Ungu) */
+  --accent-color: #8b5cf6;
+  --accent-color-hover: #7c3aed;
+  
+  /* Warna Fungsional */
+  --border-color: #e2e8f0;      /* Warna border yang sangat halus */
+  --success-color: #22c55e;
+  --danger-color: #ef4444;
+  
+  /* Warna Tombol Soft (Sesuai Permintaan Anda) */
+  --soft-blue: #60a5fa;
+  --soft-green: #4ade80;
+  --soft-red: #f87171;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
+/* Terapkan Gaya Dasar */
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  color: var(--text-secondary);
+  position: relative; /* Diperlukan agar pseudo-element bisa diposisikan */
+  color: #ffffff; /* Atur warna teks default menjadi putih agar kontras */
+  overflow-x: hidden; /* Tetap pertahankan ini */
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Membuat lapisan latar belakang yang akan kita blur */
+body::before {
+  content: '';
+  position: fixed; /* Membuatnya menempel di seluruh viewport */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* PENTING: Posisikan di belakang semua konten */
+
+  background-image: url('/background.jpg'); /* Arahkan ke gambar Anda */
+  background-size: cover;
+  background-position: center;
+
+  /* INI ADALAH KUNCI UTAMANYA */
+  filter: blur(5px);
+  /* brightness(0.0); Atur tingkat blur dan sedikit gelapkan */
+  
+  /* Mencegah blur keluar dari layar */
+  transform: scale(1.1);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Gaya Kartu dengan Bayangan */
+.card-shadow {
+  background-color: var(--card-background-color) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* === GAYA TOMBOL & BADGE BARU === */
+
+/* Tombol Primer (Ungu) */
+.btn-primary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--text-light) !important;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background-color: var(--accent-color-hover) !important;
+  border-color: var(--accent-color-hover) !important;
+}
+
+/* Badge (Ungu) */
+.badge.bg-primary {
+  background-color: var(--accent-color) !important;
+}
+/* Anda bisa menambahkan override untuk .bg-success dan .bg-danger jika perlu */
+
+/* Kelas Kustom untuk Tombol Soft */
+.btn-soft-blue {
+    background-color: #eff6ff !important;
+    border-color: #dbeafe !important;
+    color: #3b82f6 !important;
+    font-weight: 600;
+}
+.btn-soft-green {
+    background-color: #f0fdf4 !important;
+    border-color: #dcfce7 !important;
+    color: #22c55e !important;
+    font-weight: 600;
+}
+.btn-soft-red {
+    background-color: #fef2f2 !important;
+    border-color: #fee2e2 !important;
+    color: #ef4444 !important;
+    font-weight: 600;
 }

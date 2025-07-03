@@ -122,7 +122,7 @@ export default function AdminPanel({ contract }) {
     </div>
       <h2>Manajemen Sesi Pemilihan</h2>
       {error && <Alert variant="danger">{error}</Alert>}
-      <Card className="mb-4">
+      <Card className="card-shadow">
         <Card.Header as="h5">Daftar Semua Sesi</Card.Header>
         <Table striped bordered hover responsive>
           <thead><tr><th>ID</th><th>Nama Sesi</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -157,7 +157,7 @@ export default function AdminPanel({ contract }) {
         <div className="mt-5">
           <hr />
           <h3>Detail Sesi Aktif: <span className="text-primary">{activeSession.nama_sesi}</span> (ID: {activeSession.id})</h3> 
-          <Card className="mb-4">
+          <Card className="card-shadow">
             <Card.Header>Kontrol Sesi</Card.Header>
             <Card.Body>
               <Card.Title>Status Saat Ini: <span className="fw-bold">{activeSession.status}</span></Card.Title> 
@@ -172,7 +172,7 @@ export default function AdminPanel({ contract }) {
           {activeSession.status !== 'Selesai' ? ( 
             <Row>
               <Col md={5} className="mb-3 mb-md-0">
-                <Card>
+                <Card className="card-shadow">
                   <Card.Header>Manajemen Kandidat</Card.Header>
                   <Card.Body>
                     <ListGroup variant="flush" className="mb-3">
@@ -188,7 +188,7 @@ export default function AdminPanel({ contract }) {
                 </Card>
               </Col>
               <Col md={7}>
-                <Card>
+                <Card className="card-shadow">
                   <Card.Header>Otorisasi Pemilih</Card.Header>
                   <Card.Body>
                     <div style={{maxHeight: '200px', overflowY: 'auto', marginBottom: '15px'}}>
@@ -206,7 +206,7 @@ export default function AdminPanel({ contract }) {
               </Col>
             </Row>
           ) : (
-            <Card className="mt-4 border-success">
+            <Card className="card-shadow">
               <Card.Header as="h5" className="bg-success text-white">Hasil Akhir Pemilihan</Card.Header> 
               <Card.Body>
                 <Card.Title>Total Suara Masuk: {totalVotes}</Card.Title> 

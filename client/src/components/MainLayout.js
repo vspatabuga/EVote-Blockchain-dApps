@@ -8,7 +8,7 @@ export default function MainLayout({ children }) {
 
   return (
     <>
-      <Navbar bg="dark" variant="dark" expand="lg">
+      <Navbar collapseOnSelect expand="lg" className="app-header" sticky="top">
         <Container>
           <Navbar.Brand href="/dashboard">E-Voting dApp</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

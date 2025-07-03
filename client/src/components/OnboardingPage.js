@@ -246,7 +246,7 @@ const handleFinalizeRegistration = async () => {
   const isLoading = isWeb3Connecting || isActionLoading;
 
   return (
-    <Card>
+    <Card className="card-shadow">
       <Card.Header as="h3">Halaman Orientasi Pemilih</Card.Header>
       <Card.Body>
         <Card.Text>Selamat datang, pemilih dengan NIM <strong>{nim}</strong>.</Card.Text>

@@ -67,11 +67,11 @@ export default function HomePage() {
   };
 
   return (
-    <Container fluid className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: '#212529' }}>
+    <Container fluid className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
       <Container>
         <Row>
           {/* Kolom Kiri untuk Pengumuman */}
-          <Col md={6} className="d-flex flex-column justify-content-center text-light mb-4 mb-md-0">
+          <Col md={6} className="d-flex flex-column justify-content-center mb-4 mb-md-0">
             <h1 className="mb-4">Portal E-Voting Terdesentralisasi</h1>
             <p className="lead">Platform pemungutan suara yang transparan, aman, dan dapat diaudit menggunakan teknologi blockchain.</p>
             <div className="mt-4">

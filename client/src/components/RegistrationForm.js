@@ -53,7 +53,7 @@ export default function RegistrationForm({ onSuccess }) {
   const isLoading = isConnecting || isSubmitting;
 
   return (
-    <Card>
+    <Card className="card-shadow">
       <Card.Header as="h3">Portal E-Voting</Card.Header>
       <Card.Body>
         <div className="mb-4">
