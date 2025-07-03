@@ -101,7 +101,7 @@ export default function VoterPanel({ contract }) {
   }
 
   return (
-    <Card>
+    <Card className="card-shadow">
       <Card.Header as="h3">Portal Pemilihan - {sessionInfo?.name || 'Sesi Tidak Ditemukan'}</Card.Header>
       <Card.Body>
         <Card.Title>Silakan Pilih Kandidat Anda</Card.Title>

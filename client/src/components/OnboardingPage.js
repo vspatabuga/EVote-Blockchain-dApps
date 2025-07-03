@@ -8,6 +8,19 @@ import { useRouter } from 'next/navigation';
 import { ethers } from 'ethers';
 import Election from '@/contracts/Election.json';
 
+// Definisi detail Jaringan E-Vote Dev Network
+// Ini adalah jaringan lokal yang digunakan untuk pengembangan
+const E_VOTE_DEV_NETWORK = {
+  chainId: '0x539', // 1337 dalam format hexadecimal
+  chainName: 'E-Vote Dev Network',
+  nativeCurrency: {
+    name: 'Ethereum',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  rpcUrls: ['https://ganache.vspatabuga.io'], // Ganti dengan URL RPC Anda jika berbeda
+};
+
 // Helper untuk menerjemahkan status Enum dari Solidity ke Teks
 const statusMapping = ['Belum Dimulai', 'Registrasi', 'VotingBerlangsung', 'Selesai'];
 
@@ -169,6 +182,25 @@ export default function OnboardingPage({ nim, onSuccess }) {
 
   const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
 
+  // Fungsi Mengecek jaringan
+  const handleSwitchOrAddNetwork = async () => {
+  if (!provider) {
+    toast.error("Provider wallet tidak ditemukan.");
+    return;
+  }
+
+  const toastId = toast.loading("Meminta untuk ganti jaringan...");
+  try {
+    // Mengirim permintaan ke MetaMask untuk menambah/beralih jaringan
+    await provider.send('wallet_addEthereumChain', [E_VOTE_DEV_NETWORK]);
+    toast.success("Jaringan berhasil diubah!", { id: toastId });
+    // State isNetworkCorrect akan diperbarui secara otomatis oleh useEffect yang sudah ada
+  } catch (error) {
+    console.error("Gagal menambahkan atau mengganti jaringan:", error);
+    toast.error("Gagal: Anda menolak permintaan atau terjadi error lain.", { id: toastId });
+  }
+};
+
   // Fungsi untuk meminta dana dari faucet
   const handleGetFunds = async () => {
     if (sessionInfo?.status !== 'Registrasi') {
@@ -263,10 +295,18 @@ const handleFinalizeRegistration = async () => {
             {!account ? <Button variant="primary" onClick={connectWallet} disabled={isLoading}>{isWeb3Connecting ? 'Menghubungkan...' : 'Hubungkan'}</Button> : <Badge bg="success">Selesai</Badge>}
           </ListGroup.Item>
           
-          <ListGroup.Item as="li" className="d-flex justify-content-between align-items-center">
-            <div><strong>2. Berada di Jaringan Voting</strong></div>
-            {!account ? <Badge bg="secondary">Menunggu</Badge> : isNetworkCorrect ? <Badge bg="success">✓ Benar</Badge> : <Badge bg="warning">X Salah</Badge>}
-          </ListGroup.Item>
+        <ListGroup.Item as="li" className="d-flex justify-content-between align-items-center">
+          <div><strong>2. Berada di Jaringan Voting</strong></div>
+          {!account ? (
+              <Badge bg="secondary">Menunggu</Badge>
+          ) : isNetworkCorrect ? (
+              <Badge bg="success">✓ Benar</Badge>
+          ) : (
+              <Button variant="warning" size="sm" onClick={handleSwitchOrAddNetwork}>
+                  Ganti/Tambah Jaringan
+              </Button>
+          )}
+        </ListGroup.Item>
           
           <ListGroup.Item as="li" className="d-flex justify-content-between align-items-center">
             <div><strong>3. Minta Dana Uji Coba</strong></div>

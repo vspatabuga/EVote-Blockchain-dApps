@@ -14,7 +14,7 @@ export default function AnnouncementCard({ data, isLoading, error }) {
   const totalVotes = data?.candidates?.reduce((sum, c) => sum + c.voteCount, 0) || 0;
 
   return (
-    <Card className="h-100">
+    <Card className="card-shadow">
       <Card.Header as="h4">Pengumuman</Card.Header>
       <Card.Body>
         {data && data.status === 'Selesai' ? (

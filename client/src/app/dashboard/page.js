@@ -20,7 +20,10 @@ export default function DashboardPage() {
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [pageError, setPageError] = useState('');
 
+
   useEffect(() => {
+
+    document.body.className = 'theme-light';
     const initializePage = async () => {
       // Jika proses loading provider selesai dan ternyata tidak ada akun,
       // tendang kembali pengguna ke halaman utama.

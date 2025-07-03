@@ -54,7 +54,7 @@ export default function RegistrationForm({ onSuccess }) {
 
   return (
     <Card className="card-shadow">
-      <Card.Header as="h3">Portal E-Voting</Card.Header>
+      <Card.Header style={{ background: 'none', borderBottom: '1px solid var(--border-color)' }}>Portal E-Voting</Card.Header>
       <Card.Body>
         <div className="mb-4">
           <Card.Title>1. Untuk Pemilih (Baru & Lama)</Card.Title>

@@ -1,33 +1,43 @@
 "use client";
 
 import { Container, Navbar, Nav } from 'react-bootstrap';
-import { useWeb3 } from '../contexts/Web3Provider';
+import { useWeb3 } from '@/contexts/Web3Provider';
 
 export default function MainLayout({ children }) {
   const { account } = useWeb3();
 
   return (
     <>
-      <Navbar collapseOnSelect expand="lg" className="app-header" sticky="top">
+      {/* PERUBAHAN 1: Menggunakan className, bukan bg/variant */}
+      <Navbar collapseOnSelect expand="lg" className="app-header-blur" sticky="top">
         <Container>
-          <Navbar.Brand href="/dashboard">E-Voting dApp</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
+          <Navbar.Brand href="/" className="fw-bold">
+            E-Voting dApp
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="ms-auto">
               {account ? (
-                <Nav.Link disabled>
-                  Terhubung: {`${account.substring(0, 6)}...${account.substring(account.length - 4)}`}
-                </Nav.Link>
+                // PERUBAHAN 2: Tampilan akun sekarang memiliki border dan gaya khusus
+                <div className="account-display">
+                  <span>Terhubung: {`${account.substring(0, 6)}...${account.substring(account.length - 4)}`}</span>
+                </div>
               ) : (
-                <Nav.Link disabled>Tidak Terhubung</Nav.Link>
+                <div className="account-display">
+                  <span>Tidak Terhubung</span>
+                </div>
               )}
             </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <Container className="mt-4">
-        {children}
-      </Container>
+
+      {/* Konten utama sekarang memiliki padding yang konsisten */}
+      <main>
+        <Container className="py-4">
+          {children}
+        </Container>
+      </main>
     </>
   );
 }

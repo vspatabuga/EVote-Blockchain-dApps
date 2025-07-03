@@ -23,6 +23,11 @@ export default function HomePage() {
   const [isLoadingAnnouncement, setIsLoadingAnnouncement] = useState(true);
   const [announcementError, setAnnouncementError] = useState('');
 
+  // Efek untuk menerapkan tema gelap
+  useEffect(() => {
+    document.body.className = 'theme-dark';
+  }, []);
+
   // Ambil data hasil pemilu terakhir saat halaman dimuat
   useEffect(() => {
     const fetchResults = async () => {
@@ -71,7 +76,7 @@ export default function HomePage() {
       <Container>
         <Row>
           {/* Kolom Kiri untuk Pengumuman */}
-          <Col md={6} className="d-flex flex-column justify-content-center mb-4 mb-md-0">
+          <Col md={6} className="d-flex flex-column justify-content-center text-light mb-4 mb-md-0">
             <h1 className="mb-4">Portal E-Voting Terdesentralisasi</h1>
             <p className="lead">Platform pemungutan suara yang transparan, aman, dan dapat diaudit menggunakan teknologi blockchain.</p>
             <div className="mt-4">

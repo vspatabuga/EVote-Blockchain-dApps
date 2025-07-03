@@ -108,7 +108,7 @@ export default function AdminPanel({ contract }) {
   if (isLoading) return <Container className="d-flex justify-content-center align-items-center p-5"><Spinner animation="border" /></Container>; 
 
   return (
-    <Container className="bg-light p-4 rounded"> {/* Modul Container tetap ada sesuai V6 */}
+    <Container> 
       <div className="d-flex justify-content-between align-items-center mb-3">
       <h2>Panel Administator</h2>
       <Button 
@@ -162,9 +162,9 @@ export default function AdminPanel({ contract }) {
             <Card.Body>
               <Card.Title>Status Saat Ini: <span className="fw-bold">{activeSession.status}</span></Card.Title> 
               <div className="d-flex flex-wrap gap-2 mt-3">
-                <Button variant="info" onClick={() => handleUpdateStatus('Registrasi')} disabled={activeSession.status !== 'Belum Dimulai'}>Buka Pendaftaran</Button> 
-                <Button variant="primary" onClick={() => handleUpdateStatus('VotingBerlangsung')} disabled={activeSession.status !== 'Registrasi'}>Buka Voting</Button> 
-                <Button variant="danger" onClick={() => handleUpdateStatus('Selesai')} disabled={activeSession.status !== 'VotingBerlangsung'}>Tutup Voting</Button> 
+                  <Button className="btn-soft-blue" onClick={() => handleUpdateStatus('Registrasi')} disabled={activeSession.status !== 'Belum Dimulai'}>Buka Pendaftaran</Button>
+                  <Button className="btn-soft-green" onClick={() => handleUpdateStatus('VotingBerlangsung')} disabled={activeSession.status !== 'Registrasi'}>Buka Voting</Button>
+                  <Button className="btn-soft-red" onClick={() => handleUpdateStatus('Selesai')} disabled={activeSession.status !== 'VotingBerlangsung'}>Tutup Voting</Button>
               </div>
             </Card.Body>
           </Card>
